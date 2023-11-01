@@ -21,14 +21,26 @@ class Political_Spectrum:
     def ch_social(self, value):
         if ((self.social + value) >= -1) and ((self.social + value) <= 1):
             self.social += value
+        elif ((self.social + value) < -1):
+            self.social = -1
+        else:
+            self.social = 1
 
     def ch_institutional(self, value):
         if ((self.institutional + value) >= -1) and ((self.institutional + value) <= 1):
             self.institutional += value
+        elif ((self.institutional + value) < -1):
+            self.institutional = -1
+        else:
+            self.institutional = 1
 
     def ch_economical(self, value):
         if ((self.economical + value) >= -1) and ((self.economical + value) <= 1):
             self.economical += value
+        elif ((self.economical + value) < -1):
+            self.economical = -1
+        else:
+            self.economical = 1
 
     @classmethod
     def compatibility_relative(cls, s1, s2):
@@ -66,7 +78,7 @@ class Party:
 
 
 class Actor:
-    def __init__(self, surname, name, age=random.randint(0, 76)):
+    def __init__(self, surname="John", name="Doe", age=random.randint(0, 76)):
         self.surname = surname
         self.name = name
         self.age = age
@@ -93,6 +105,15 @@ class Engine:
         self.parties[0].leader = self.actors[0]
         self.parties[1].leader = self.actors[1]
         self.parties[2].leader = self.actors[2]
+        
+        for i in range(97):
+            actor = Actor()
+            base_spectrum = 0.1 * np.random.standard_normal()
+            actor.spectrum.ch_social(base_spectrum + 0.1 * np.random.standard_normal())
+            actor.spectrum.ch_institutional(base_spectrum + 0.1 * np.random.standard_normal())
+            actor.spectrum.ch_economical(base_spectrum + 0.1 * np.random.standard_normal())
+
+            self.actors.append(actor)
 
     def update_parties_spectrum(self):
         parties_members = dict()
@@ -115,7 +136,7 @@ class Engine:
         print(len(electors), "électeurs")
 
         ballot = []
-        for actor in self.actors:
+        for actor in electors:
             compatibility = list((candidate, Political_Spectrum.compatibility_absolute(actor.spectrum, candidate.spectrum)) for candidate in candidates)
             ballot.append(min(compatibility, key=lambda x: x[1])[0])
 
@@ -125,8 +146,8 @@ class Engine:
         ordered_results = list(results.items())
         ordered_results.sort(key=lambda x: x[1], reverse=1)
         for i, result in enumerate(ordered_results):
-            print(f"{result[0].fullname()} - {round(result[1] * 100 / len(self.actors), 2)}%")
-            if result[1] > (len(self.actors) // 2):
+            print(f"{result[0].fullname()} - {round(result[1] * 100 / len(electors), 2)}%")
+            if result[1] > (len(electors) // 2):
                 winner = result[0]
         
         if winner:
